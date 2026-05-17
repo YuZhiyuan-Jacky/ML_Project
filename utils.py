@@ -66,9 +66,13 @@ def make_run_name(args) -> str:
     return f"{args.dataset}_{args.model}_seed{args.seed}_{timestamp}"
 
 
-def setup_logger(output_dir: str, run_name: str) -> Tuple[logging.Logger, str]:
-    ensure_dir(output_dir)
-    log_path = os.path.join(output_dir, f"{run_name}.log")
+def make_run_dir(output_dir: str, run_name: str) -> str:
+    return os.path.join(output_dir, run_name)
+
+
+def setup_logger(run_dir: str) -> Tuple[logging.Logger, str]:
+    ensure_dir(run_dir)
+    log_path = os.path.join(run_dir, "run.log")
     logger = logging.getLogger("node_classification")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()

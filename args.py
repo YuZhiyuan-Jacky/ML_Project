@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument("--gpu", type=int, default=0)
 
     parser.add_argument("--output-dir", type=str, default="outputs")
-    parser.add_argument("--run-name", type=str, default=None, help="Optional name used for log/result files.")
+    parser.add_argument("--run-name", type=str, default=None, help="Optional name used for the output subdirectory.")
     parser.add_argument("--no-save-results", action="store_true", help="Do not save final metrics to JSON.")
     parser.add_argument("--save-model", action="store_true", help="Save the best validation checkpoint.")
     parser.add_argument("--log-every", type=int, default=10)

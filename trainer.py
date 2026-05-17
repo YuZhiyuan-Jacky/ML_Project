@@ -115,8 +115,8 @@ class Trainer:
         final_metrics["best_val_acc"] = self.best_val_acc
 
         if not self.args.no_save_results:
-            ensure_dir(self.args.output_dir)
-            results_path = os.path.join(self.args.output_dir, f"{self.args.run_name}_results.json")
+            ensure_dir(self.args.run_dir)
+            results_path = os.path.join(self.args.run_dir, "results.json")
             payload = {
                 "run_name": self.args.run_name,
                 "dataset": self.args.dataset,
@@ -132,8 +132,8 @@ class Trainer:
             self.logger.info(f"Saved results to {results_path}")
 
         if self.args.save_model:
-            ensure_dir(self.args.output_dir)
-            model_path = os.path.join(self.args.output_dir, f"{self.args.run_name}_best.pt")
+            ensure_dir(self.args.run_dir)
+            model_path = os.path.join(self.args.run_dir, "best.pt")
             torch.save(self.model.state_dict(), model_path)
             self.logger.info(f"Saved best model checkpoint to {model_path}")
 

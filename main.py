@@ -2,17 +2,19 @@ from args import parse_args
 from model import build_model
 from trainer import Trainer
 from tools import set_seed
-from utils import get_device, load_graph_data, make_run_name, move_to_device, setup_logger
+from utils import get_device, load_graph_data, make_run_dir, make_run_name, move_to_device, setup_logger
 
 
 def main():
     args = parse_args()
     args.run_name = make_run_name(args)
-    logger, log_path = setup_logger(args.output_dir, args.run_name)
+    args.run_dir = make_run_dir(args.output_dir, args.run_name)
+    logger, log_path = setup_logger(args.run_dir)
 
     set_seed(args.seed)
     device = get_device(args.device, args.gpu)
     logger.info(f"Run name: {args.run_name}")
+    logger.info(f"Run dir: {args.run_dir}")
     logger.info(f"Log file: {log_path}")
     logger.info(f"Arguments: {vars(args)}")
 
