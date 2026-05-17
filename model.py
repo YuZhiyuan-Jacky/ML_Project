@@ -1,3 +1,11 @@
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message="The pynvml package is deprecated.*",
+    category=FutureWarning,
+)
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -33,7 +41,13 @@ class PyGGCN(nn.Module):
 
     def __init__(self, input_dim: int, hidden_dim: int, output_dim: int, num_layers: int, dropout: float):
         super().__init__()
-        from torch_geometric.nn import GCNConv
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="An issue occurred while importing \'torch-sparse\'.*",
+                category=UserWarning,
+            )
+            from torch_geometric.nn import GCNConv
 
         if num_layers < 1:
             raise ValueError("num_layers must be at least 1.")
@@ -67,7 +81,13 @@ class PyGGraphTransformer(nn.Module):
         heads: int,
     ):
         super().__init__()
-        from torch_geometric.nn import TransformerConv
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message="An issue occurred while importing \'torch-sparse\'.*",
+                category=UserWarning,
+            )
+            from torch_geometric.nn import TransformerConv
 
         if num_layers < 1:
             raise ValueError("num_layers must be at least 1.")

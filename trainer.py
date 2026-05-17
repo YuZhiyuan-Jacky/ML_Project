@@ -1,3 +1,11 @@
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    message="The pynvml package is deprecated.*",
+    category=FutureWarning,
+)
+
 import copy
 import json
 import logging
@@ -6,6 +14,7 @@ from typing import Dict
 
 import torch
 import torch.nn.functional as F
+from tqdm.auto import tqdm
 
 from utils import accuracy, ensure_dir, f1_scores
 
@@ -61,7 +70,14 @@ class Trainer:
         bad_epochs = 0
         history = []
 
-        for epoch in range(1, self.args.epochs + 1):
+        progress = tqdm(
+            range(1, self.args.epochs + 1),
+            desc="Training",
+            dynamic_ncols=True,
+            leave=True,
+        )
+
+        for epoch in progress:
             train_loss = self.train_epoch()
             metrics = self.evaluate_all()
             metrics["epoch"] = epoch
@@ -78,15 +94,16 @@ class Trainer:
                 bad_epochs += 1
 
             if epoch == 1 or epoch % self.args.log_every == 0:
-                self.logger.info(
-                    f"Epoch {epoch:03d} | "
-                    f"loss {train_loss:.4f} | "
-                    f"train_acc {metrics['train']['acc']:.4f} | "
-                    f"val_acc {metrics['val']['acc']:.4f} | "
-                    f"test_acc {metrics['test']['acc']:.4f}"
+                progress.set_postfix(
+                    loss=f"{train_loss:.4f}",
+                    train_acc=f"{metrics['train']['acc']:.4f}",
+                    val_acc=f"{metrics['val']['acc']:.4f}",
+                    test_acc=f"{metrics['test']['acc']:.4f}",
+                    best_val=f"{self.best_val_acc:.4f}",
                 )
 
             if bad_epochs >= self.args.patience:
+                progress.close()
                 self.logger.info(f"Early stopping at epoch {epoch}; best validation epoch was {self.best_epoch}.")
                 break
 
