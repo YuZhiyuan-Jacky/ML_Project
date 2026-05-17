@@ -1,11 +1,15 @@
 import json
+import logging
 import os
-import random
+import sys
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Dict, List, Tuple
 
 import numpy as np
 import torch
+
+from tools import create_dirs, set_device as project_set_device
 
 
 @dataclass
@@ -33,29 +37,44 @@ class GraphData:
         return len(self.label_names)
 
 
-def set_seed(seed: int) -> None:
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
-
-
 def get_device(device_name: str, gpu: int = 0) -> torch.device:
     if device_name == "cpu":
         return torch.device("cpu")
     if device_name == "cuda":
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA was requested, but torch.cuda.is_available() is false.")
-        return torch.device(f"cuda:{gpu}")
-    if torch.cuda.is_available():
-        return torch.device(f"cuda:{gpu}")
-    return torch.device("cpu")
+        return torch.device(project_set_device(gpu, use_cuda=True))
+    return torch.device(project_set_device(gpu, use_cuda=True))
 
 
 def ensure_dir(path: str) -> None:
-    os.makedirs(path, exist_ok=True)
+    create_dirs([path])
+
+
+def make_run_name(args) -> str:
+    if args.run_name:
+        return args.run_name
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{args.dataset}_{args.model}_seed{args.seed}_{timestamp}"
+
+
+def setup_logger(output_dir: str, run_name: str) -> Tuple[logging.Logger, str]:
+    ensure_dir(output_dir)
+    log_path = os.path.join(output_dir, f"{run_name}.log")
+    logger = logging.getLogger("node_classification")
+    logger.setLevel(logging.INFO)
+    logger.handlers.clear()
+    logger.propagate = False
+
+    formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setFormatter(formatter)
+    file_handler = logging.FileHandler(log_path, encoding="utf8")
+    file_handler.setFormatter(formatter)
+
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    return logger, log_path
 
 
 def row_normalize(features: np.ndarray) -> np.ndarray:
@@ -98,12 +117,16 @@ def _load_labels(data_path: str, id_map: Dict[str, int]) -> Tuple[torch.Tensor, 
     with open(os.path.join(data_path, "class_map.json"), "r", encoding="utf8") as fp:
         class_map = json.load(fp)
 
-    label_names = sorted({str(label) for label in class_map.values()})
+    label_names = sorted({str(label).strip() for label in class_map.values()})
     label_to_index = {label: index for index, label in enumerate(label_names)}
-    labels = torch.empty(len(id_map), dtype=torch.long)
+    labels = torch.full((len(id_map),), -1, dtype=torch.long)
 
     for raw_node_id, raw_label in class_map.items():
-        labels[id_map[str(raw_node_id)]] = label_to_index[str(raw_label)]
+        labels[id_map[str(raw_node_id)]] = label_to_index[str(raw_label).strip()]
+
+    if (labels < 0).any():
+        missing_count = int((labels < 0).sum())
+        raise ValueError(f"{missing_count} nodes have no class label.")
 
     return labels, label_names
 

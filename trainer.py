@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 import os
 from typing import Dict
 
@@ -10,10 +11,11 @@ from utils import accuracy, ensure_dir, f1_scores
 
 
 class Trainer:
-    def __init__(self, model, data, args):
+    def __init__(self, model, data, args, logger=None):
         self.model = model
         self.data = data
         self.args = args
+        self.logger = logger or logging.getLogger("node_classification")
         self.optimizer = torch.optim.Adam(
             self.model.parameters(),
             lr=args.lr,
@@ -76,7 +78,7 @@ class Trainer:
                 bad_epochs += 1
 
             if epoch == 1 or epoch % self.args.log_every == 0:
-                print(
+                self.logger.info(
                     f"Epoch {epoch:03d} | "
                     f"loss {train_loss:.4f} | "
                     f"train_acc {metrics['train']['acc']:.4f} | "
@@ -85,7 +87,7 @@ class Trainer:
                 )
 
             if bad_epochs >= self.args.patience:
-                print(f"Early stopping at epoch {epoch}; best validation epoch was {self.best_epoch}.")
+                self.logger.info(f"Early stopping at epoch {epoch}; best validation epoch was {self.best_epoch}.")
                 break
 
         if self.best_state is not None:
@@ -95,12 +97,27 @@ class Trainer:
         final_metrics["best_epoch"] = self.best_epoch
         final_metrics["best_val_acc"] = self.best_val_acc
 
+        if not self.args.no_save_results:
+            ensure_dir(self.args.output_dir)
+            results_path = os.path.join(self.args.output_dir, f"{self.args.run_name}_results.json")
+            payload = {
+                "run_name": self.args.run_name,
+                "dataset": self.args.dataset,
+                "model": self.args.model,
+                "seed": self.args.seed,
+                "best_epoch": self.best_epoch,
+                "best_val_acc": self.best_val_acc,
+                "metrics": final_metrics,
+                "history": history,
+            }
+            with open(results_path, "w", encoding="utf8") as fp:
+                json.dump(payload, fp, ensure_ascii=False, indent=2)
+            self.logger.info(f"Saved results to {results_path}")
+
         if self.args.save_model:
             ensure_dir(self.args.output_dir)
-            model_path = os.path.join(self.args.output_dir, f"{self.args.dataset}_{self.args.model}_best.pt")
-            metrics_path = os.path.join(self.args.output_dir, f"{self.args.dataset}_{self.args.model}_metrics.json")
+            model_path = os.path.join(self.args.output_dir, f"{self.args.run_name}_best.pt")
             torch.save(self.model.state_dict(), model_path)
-            with open(metrics_path, "w", encoding="utf8") as fp:
-                json.dump(final_metrics, fp, ensure_ascii=False, indent=2)
+            self.logger.info(f"Saved best model checkpoint to {model_path}")
 
         return final_metrics

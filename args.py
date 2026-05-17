@@ -31,7 +31,18 @@ def parse_args():
     parser.add_argument("--gpu", type=int, default=0)
 
     parser.add_argument("--output-dir", type=str, default="outputs")
+    parser.add_argument("--run-name", type=str, default=None, help="Optional name used for log/result files.")
+    parser.add_argument("--no-save-results", action="store_true", help="Do not save final metrics to JSON.")
     parser.add_argument("--save-model", action="store_true", help="Save the best validation checkpoint.")
     parser.add_argument("--log-every", type=int, default=10)
 
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.num_layers < 1:
+        parser.error("--num-layers must be at least 1")
+    if args.hidden_dim < 1:
+        parser.error("--hidden-dim must be at least 1")
+    if not 0 <= args.dropout < 1:
+        parser.error("--dropout must be in [0, 1)")
+    if args.log_every < 1:
+        parser.error("--log-every must be at least 1")
+    return args
