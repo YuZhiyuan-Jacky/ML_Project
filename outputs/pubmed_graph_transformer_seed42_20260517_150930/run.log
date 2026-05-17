@@ -1,0 +1,16 @@
+2026-05-17 15:09:30,931 | INFO | Run name: pubmed_graph_transformer_seed42_20260517_150930
+2026-05-17 15:09:30,932 | INFO | Run dir: outputs/pubmed_graph_transformer_seed42_20260517_150930
+2026-05-17 15:09:30,932 | INFO | Log file: outputs/pubmed_graph_transformer_seed42_20260517_150930/run.log
+2026-05-17 15:09:30,932 | INFO | Arguments: {'dataset': 'pubmed', 'data_root': 'dataset', 'model': 'graph_transformer', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'pubmed_graph_transformer_seed42_20260517_150930', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/pubmed_graph_transformer_seed42_20260517_150930'}
+2026-05-17 15:09:32,596 | INFO | Dataset: pubmed | nodes: 19717 | features: 500 | classes: 3
+2026-05-17 15:09:32,596 | INFO | Model: graph_transformer | Device: cuda:0
+2026-05-17 15:09:32,619 | INFO | Split sizes: train=11829, val=3942, test=3946
+2026-05-17 15:09:36,541 | INFO | Saved results to outputs/pubmed_graph_transformer_seed42_20260517_150930/results.json
+2026-05-17 15:09:36,748 | INFO | Saved test outputs to outputs/pubmed_graph_transformer_seed42_20260517_150930/test_outputs.json
+2026-05-17 15:09:36,748 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:09:36,748 | INFO | train: loss=0.2721, acc=0.9107, macro_f1=0.9080, weighted_f1=0.9106
+2026-05-17 15:09:36,748 | INFO | val: loss=0.3203, acc=0.8820, macro_f1=0.8777, weighted_f1=0.8818
+2026-05-17 15:09:36,748 | INFO | test: loss=0.2934, acc=0.8943, macro_f1=0.8895, weighted_f1=0.8942
+2026-05-17 15:09:36,748 | INFO | best_epoch=190, best_val_acc=0.8820
+2026-05-17 15:09:36,748 | INFO | Runtime profile: training_seconds=3.9023, avg_epoch_seconds=0.0195, test_full_graph_seconds=0.001617, test_ms_per_node=0.000410
+2026-05-17 15:09:36,748 | INFO | CUDA memory profile: training_peak_allocated_mb=197.66, single_node_test_peak_allocated_mb=168.47

@@ -1,0 +1,17 @@
+2026-05-17 15:09:00,247 | INFO | Run name: citeseer_basic_gnn_seed42_20260517_150900
+2026-05-17 15:09:00,248 | INFO | Run dir: outputs/citeseer_basic_gnn_seed42_20260517_150900
+2026-05-17 15:09:00,248 | INFO | Log file: outputs/citeseer_basic_gnn_seed42_20260517_150900/run.log
+2026-05-17 15:09:00,248 | INFO | Arguments: {'dataset': 'citeseer', 'data_root': 'dataset', 'model': 'basic_gnn', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'citeseer_basic_gnn_seed42_20260517_150900', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/citeseer_basic_gnn_seed42_20260517_150900'}
+2026-05-17 15:09:00,560 | INFO | Dataset: citeseer | nodes: 3312 | features: 3703 | classes: 6
+2026-05-17 15:09:00,560 | INFO | Model: basic_gnn | Device: cuda:0
+2026-05-17 15:09:00,583 | INFO | Split sizes: train=1984, val=660, test=668
+2026-05-17 15:09:04,252 | INFO | Early stopping at epoch 192; best validation epoch was 142.
+2026-05-17 15:09:04,269 | INFO | Saved results to outputs/citeseer_basic_gnn_seed42_20260517_150900/results.json
+2026-05-17 15:09:04,295 | INFO | Saved test outputs to outputs/citeseer_basic_gnn_seed42_20260517_150900/test_outputs.json
+2026-05-17 15:09:04,295 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:09:04,295 | INFO | train: loss=0.6674, acc=0.8135, macro_f1=0.7344, weighted_f1=0.7927
+2026-05-17 15:09:04,295 | INFO | val: loss=0.7659, acc=0.7879, macro_f1=0.7149, weighted_f1=0.7691
+2026-05-17 15:09:04,295 | INFO | test: loss=0.7979, acc=0.7754, macro_f1=0.6910, weighted_f1=0.7527
+2026-05-17 15:09:04,295 | INFO | best_epoch=142, best_val_acc=0.7879
+2026-05-17 15:09:04,295 | INFO | Runtime profile: training_seconds=3.1024, avg_epoch_seconds=0.0162, test_full_graph_seconds=0.001617, test_ms_per_node=0.002421
+2026-05-17 15:09:04,295 | INFO | CUDA memory profile: training_peak_allocated_mb=207.49, single_node_test_peak_allocated_mb=207.49

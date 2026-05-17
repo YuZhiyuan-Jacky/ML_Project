@@ -1,0 +1,17 @@
+2026-05-17 15:09:12,169 | INFO | Run name: citeseer_graph_transformer_seed42_20260517_150912
+2026-05-17 15:09:12,169 | INFO | Run dir: outputs/citeseer_graph_transformer_seed42_20260517_150912
+2026-05-17 15:09:12,170 | INFO | Log file: outputs/citeseer_graph_transformer_seed42_20260517_150912/run.log
+2026-05-17 15:09:12,170 | INFO | Arguments: {'dataset': 'citeseer', 'data_root': 'dataset', 'model': 'graph_transformer', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'citeseer_graph_transformer_seed42_20260517_150912', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/citeseer_graph_transformer_seed42_20260517_150912'}
+2026-05-17 15:09:13,264 | INFO | Dataset: citeseer | nodes: 3312 | features: 3703 | classes: 6
+2026-05-17 15:09:13,264 | INFO | Model: graph_transformer | Device: cuda:0
+2026-05-17 15:09:13,284 | INFO | Split sizes: train=1984, val=660, test=668
+2026-05-17 15:09:16,301 | INFO | Early stopping at epoch 145; best validation epoch was 95.
+2026-05-17 15:09:16,320 | INFO | Saved results to outputs/citeseer_graph_transformer_seed42_20260517_150912/results.json
+2026-05-17 15:09:16,345 | INFO | Saved test outputs to outputs/citeseer_graph_transformer_seed42_20260517_150912/test_outputs.json
+2026-05-17 15:09:16,345 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:09:16,345 | INFO | train: loss=0.4334, acc=0.8936, macro_f1=0.8653, weighted_f1=0.8889
+2026-05-17 15:09:16,346 | INFO | val: loss=0.6757, acc=0.7909, macro_f1=0.7516, weighted_f1=0.7844
+2026-05-17 15:09:16,346 | INFO | test: loss=0.7120, acc=0.7665, macro_f1=0.7118, weighted_f1=0.7564
+2026-05-17 15:09:16,346 | INFO | best_epoch=95, best_val_acc=0.7909
+2026-05-17 15:09:16,346 | INFO | Runtime profile: training_seconds=3.0167, avg_epoch_seconds=0.0208, test_full_graph_seconds=0.001473, test_ms_per_node=0.002205
+2026-05-17 15:09:16,346 | INFO | CUDA memory profile: training_peak_allocated_mb=90.31, single_node_test_peak_allocated_mb=90.31

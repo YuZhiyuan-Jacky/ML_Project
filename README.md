@@ -155,6 +155,10 @@ outputs/<run_name>/
 - best epoch
 - best validation accuracy
 - 每个 epoch 的训练历史
+- `runtime_profile`：训练总耗时、平均每轮耗时、一次全图测试前向耗时、按测试节点数平均的单节点测试耗时。
+- `memory_profile`：CUDA 训练峰值显存、单节点测试峰值显存；CPU 运行时显存字段为 `null`。
+
+注意：当前模型采用全图 GNN 前向传播，单节点测试耗时按“一次全图测试前向耗时 / 测试节点数”统计；单节点测试显存为当前全图前向推理模式下的峰值 CUDA allocation。
 
 `test_outputs.json` 会记录测试集中每个节点的：
 

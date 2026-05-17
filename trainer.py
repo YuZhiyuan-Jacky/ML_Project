@@ -6,10 +6,10 @@ warnings.filterwarnings(
     category=FutureWarning,
 )
 
-import copy
 import json
 import logging
 import os
+import time
 from typing import Dict
 
 import torch
@@ -33,6 +33,27 @@ class Trainer:
         self.best_state = None
         self.best_val_acc = -1.0
         self.best_epoch = 0
+        self.device = next(self.model.parameters()).device
+
+    def _snapshot_state_dict(self):
+        return {
+            name: tensor.detach().cpu().clone()
+            for name, tensor in self.model.state_dict().items()
+        }
+
+    def _synchronize_device(self) -> None:
+        if self.device.type == "cuda":
+            torch.cuda.synchronize(self.device)
+
+    def _reset_cuda_peak_memory(self) -> None:
+        if self.device.type == "cuda":
+            torch.cuda.reset_peak_memory_stats(self.device)
+
+    def _cuda_peak_allocated_mb(self):
+        if self.device.type != "cuda":
+            return None
+        self._synchronize_device()
+        return float(torch.cuda.max_memory_allocated(self.device) / (1024 ** 2))
 
     def train_epoch(self) -> float:
         self.model.train()
@@ -105,9 +126,40 @@ class Trainer:
             "records": records,
         }
 
+    @torch.no_grad()
+    def profile_test_inference(self) -> Dict[str, object]:
+        self.model.eval()
+        test_count = int(self.data.test_mask.sum().item())
+
+        self._reset_cuda_peak_memory()
+        self._synchronize_device()
+        start_time = time.perf_counter()
+        logits = self.model(self.data)
+        test_predictions = logits[self.data.test_mask].argmax(dim=-1)
+        if self.device.type == "cuda":
+            _ = test_predictions.detach()
+        self._synchronize_device()
+        elapsed_seconds = time.perf_counter() - start_time
+
+        seconds_per_node = elapsed_seconds / test_count if test_count > 0 else 0.0
+        return {
+            "test_num_nodes": test_count,
+            "test_full_graph_seconds": float(elapsed_seconds),
+            "test_seconds_per_node": float(seconds_per_node),
+            "test_ms_per_node": float(seconds_per_node * 1000.0),
+            "single_node_test_peak_allocated_mb": self._cuda_peak_allocated_mb(),
+            "measurement_note": (
+                "Full-batch GNN inference computes logits for the whole graph; "
+                "single-node test time is averaged as full-graph forward time divided by test node count."
+            ),
+        }
+
     def fit(self) -> Dict[str, Dict[str, float]]:
         bad_epochs = 0
         history = []
+        self._reset_cuda_peak_memory()
+        self._synchronize_device()
+        train_start_time = time.perf_counter()
 
         progress = tqdm(
             range(1, self.args.epochs + 1),
@@ -127,7 +179,7 @@ class Trainer:
             if val_acc > self.best_val_acc:
                 self.best_val_acc = val_acc
                 self.best_epoch = epoch
-                self.best_state = copy.deepcopy(self.model.state_dict())
+                self.best_state = self._snapshot_state_dict()
                 bad_epochs = 0
             else:
                 bad_epochs += 1
@@ -146,12 +198,41 @@ class Trainer:
                 self.logger.info(f"Early stopping at epoch {epoch}; best validation epoch was {self.best_epoch}.")
                 break
 
+        self._synchronize_device()
+        training_seconds = time.perf_counter() - train_start_time
+        training_peak_allocated_mb = self._cuda_peak_allocated_mb()
+        completed_epochs = len(history)
+
         if self.best_state is not None:
             self.model.load_state_dict(self.best_state)
 
         final_metrics = self.evaluate_all()
         final_metrics["best_epoch"] = self.best_epoch
         final_metrics["best_val_acc"] = self.best_val_acc
+        inference_profile = self.profile_test_inference()
+        runtime_profile = {
+            "device": str(self.device),
+            "epochs_completed": completed_epochs,
+            "training_seconds": float(training_seconds),
+            "avg_epoch_seconds": float(training_seconds / completed_epochs) if completed_epochs else 0.0,
+            "test_num_nodes": inference_profile["test_num_nodes"],
+            "test_full_graph_seconds": inference_profile["test_full_graph_seconds"],
+            "test_seconds_per_node": inference_profile["test_seconds_per_node"],
+            "test_ms_per_node": inference_profile["test_ms_per_node"],
+            "measurement_note": inference_profile["measurement_note"],
+        }
+        memory_profile = {
+            "device": str(self.device),
+            "cuda_memory_available": self.device.type == "cuda",
+            "training_peak_allocated_mb": training_peak_allocated_mb,
+            "single_node_test_peak_allocated_mb": inference_profile["single_node_test_peak_allocated_mb"],
+            "measurement_note": (
+                "CUDA memory is reported as torch.cuda.max_memory_allocated. "
+                "For full-batch GNN inference, single-node test memory is the peak allocation of one full-graph forward."
+            ),
+        }
+        final_metrics["runtime_profile"] = runtime_profile
+        final_metrics["memory_profile"] = memory_profile
 
         if not self.args.no_save_results:
             ensure_dir(self.args.run_dir)
@@ -164,6 +245,8 @@ class Trainer:
                 "best_epoch": self.best_epoch,
                 "best_val_acc": self.best_val_acc,
                 "metrics": final_metrics,
+                "runtime_profile": runtime_profile,
+                "memory_profile": memory_profile,
                 "history": history,
             }
             with open(results_path, "w", encoding="utf8") as fp:

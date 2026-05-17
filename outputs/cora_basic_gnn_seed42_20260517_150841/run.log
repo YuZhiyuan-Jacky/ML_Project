@@ -1,0 +1,16 @@
+2026-05-17 15:08:41,689 | INFO | Run name: cora_basic_gnn_seed42_20260517_150841
+2026-05-17 15:08:41,689 | INFO | Run dir: outputs/cora_basic_gnn_seed42_20260517_150841
+2026-05-17 15:08:41,689 | INFO | Log file: outputs/cora_basic_gnn_seed42_20260517_150841/run.log
+2026-05-17 15:08:41,689 | INFO | Arguments: {'dataset': 'cora', 'data_root': 'dataset', 'model': 'basic_gnn', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'cora_basic_gnn_seed42_20260517_150841', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/cora_basic_gnn_seed42_20260517_150841'}
+2026-05-17 15:08:41,963 | INFO | Dataset: cora | nodes: 2708 | features: 1433 | classes: 7
+2026-05-17 15:08:41,963 | INFO | Model: basic_gnn | Device: cuda:0
+2026-05-17 15:08:41,982 | INFO | Split sizes: train=1621, val=539, test=548
+2026-05-17 15:08:44,907 | INFO | Saved results to outputs/cora_basic_gnn_seed42_20260517_150841/results.json
+2026-05-17 15:08:44,931 | INFO | Saved test outputs to outputs/cora_basic_gnn_seed42_20260517_150841/test_outputs.json
+2026-05-17 15:08:44,931 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:08:44,931 | INFO | train: loss=0.4059, acc=0.9118, macro_f1=0.9026, weighted_f1=0.9120
+2026-05-17 15:08:44,931 | INFO | val: loss=0.5021, acc=0.8850, macro_f1=0.8747, weighted_f1=0.8851
+2026-05-17 15:08:44,932 | INFO | test: loss=0.4990, acc=0.8923, macro_f1=0.8877, weighted_f1=0.8925
+2026-05-17 15:08:44,932 | INFO | best_epoch=193, best_val_acc=0.8850
+2026-05-17 15:08:44,932 | INFO | Runtime profile: training_seconds=2.3493, avg_epoch_seconds=0.0117, test_full_graph_seconds=0.000525, test_ms_per_node=0.000958
+2026-05-17 15:08:44,932 | INFO | CUDA memory profile: training_peak_allocated_mb=77.39, single_node_test_peak_allocated_mb=77.39

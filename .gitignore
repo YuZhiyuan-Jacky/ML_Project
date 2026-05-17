@@ -22,7 +22,6 @@ env/
 .DS_Store
 
 # Experiment outputs and model checkpoints
-outputs/
 runs/
 logs/
 checkpoints/

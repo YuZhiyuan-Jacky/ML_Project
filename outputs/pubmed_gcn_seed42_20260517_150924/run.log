@@ -1,0 +1,16 @@
+2026-05-17 15:09:24,641 | INFO | Run name: pubmed_gcn_seed42_20260517_150924
+2026-05-17 15:09:24,641 | INFO | Run dir: outputs/pubmed_gcn_seed42_20260517_150924
+2026-05-17 15:09:24,641 | INFO | Log file: outputs/pubmed_gcn_seed42_20260517_150924/run.log
+2026-05-17 15:09:24,641 | INFO | Arguments: {'dataset': 'pubmed', 'data_root': 'dataset', 'model': 'gcn', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'pubmed_gcn_seed42_20260517_150924', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/pubmed_gcn_seed42_20260517_150924'}
+2026-05-17 15:09:26,314 | INFO | Dataset: pubmed | nodes: 19717 | features: 500 | classes: 3
+2026-05-17 15:09:26,314 | INFO | Model: gcn | Device: cuda:0
+2026-05-17 15:09:26,336 | INFO | Split sizes: train=11829, val=3942, test=3946
+2026-05-17 15:09:28,739 | INFO | Saved results to outputs/pubmed_gcn_seed42_20260517_150924/results.json
+2026-05-17 15:09:28,932 | INFO | Saved test outputs to outputs/pubmed_gcn_seed42_20260517_150924/test_outputs.json
+2026-05-17 15:09:28,932 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:09:28,932 | INFO | train: loss=0.3821, acc=0.8751, macro_f1=0.8694, weighted_f1=0.8749
+2026-05-17 15:09:28,932 | INFO | val: loss=0.4094, acc=0.8592, macro_f1=0.8523, weighted_f1=0.8590
+2026-05-17 15:09:28,932 | INFO | test: loss=0.3845, acc=0.8766, macro_f1=0.8703, weighted_f1=0.8765
+2026-05-17 15:09:28,932 | INFO | best_epoch=199, best_val_acc=0.8592
+2026-05-17 15:09:28,932 | INFO | Runtime profile: training_seconds=2.3886, avg_epoch_seconds=0.0119, test_full_graph_seconds=0.001170, test_ms_per_node=0.000297
+2026-05-17 15:09:28,932 | INFO | CUDA memory profile: training_peak_allocated_mb=122.98, single_node_test_peak_allocated_mb=122.98

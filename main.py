@@ -46,6 +46,27 @@ def main():
         )
     logger.info(f"best_epoch={metrics['best_epoch']}, best_val_acc={metrics['best_val_acc']:.4f}")
 
+    runtime_profile = metrics.get("runtime_profile", {})
+    if runtime_profile:
+        logger.info(
+            "Runtime profile: "
+            f"training_seconds={runtime_profile['training_seconds']:.4f}, "
+            f"avg_epoch_seconds={runtime_profile['avg_epoch_seconds']:.4f}, "
+            f"test_full_graph_seconds={runtime_profile['test_full_graph_seconds']:.6f}, "
+            f"test_ms_per_node={runtime_profile['test_ms_per_node']:.6f}"
+        )
+
+    memory_profile = metrics.get("memory_profile", {})
+    if memory_profile:
+        if memory_profile.get("cuda_memory_available"):
+            logger.info(
+                "CUDA memory profile: "
+                f"training_peak_allocated_mb={memory_profile['training_peak_allocated_mb']:.2f}, "
+                f"single_node_test_peak_allocated_mb={memory_profile['single_node_test_peak_allocated_mb']:.2f}"
+            )
+        else:
+            logger.info("CUDA memory profile: unavailable on CPU device.")
+
 
 if __name__ == "__main__":
     main()

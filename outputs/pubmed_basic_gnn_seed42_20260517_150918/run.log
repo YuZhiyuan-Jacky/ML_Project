@@ -1,0 +1,16 @@
+2026-05-17 15:09:18,474 | INFO | Run name: pubmed_basic_gnn_seed42_20260517_150918
+2026-05-17 15:09:18,474 | INFO | Run dir: outputs/pubmed_basic_gnn_seed42_20260517_150918
+2026-05-17 15:09:18,474 | INFO | Log file: outputs/pubmed_basic_gnn_seed42_20260517_150918/run.log
+2026-05-17 15:09:18,474 | INFO | Arguments: {'dataset': 'pubmed', 'data_root': 'dataset', 'model': 'basic_gnn', 'hidden_dim': 64, 'num_layers': 2, 'dropout': 0.5, 'heads': 4, 'epochs': 200, 'lr': 0.01, 'weight_decay': 0.0005, 'patience': 50, 'train_ratio': 0.6, 'val_ratio': 0.2, 'seed': 42, 'device': 'auto', 'gpu': 0, 'output_dir': 'outputs', 'run_name': 'pubmed_basic_gnn_seed42_20260517_150918', 'no_save_results': False, 'save_model': False, 'log_every': 10, 'run_dir': 'outputs/pubmed_basic_gnn_seed42_20260517_150918'}
+2026-05-17 15:09:19,362 | INFO | Dataset: pubmed | nodes: 19717 | features: 500 | classes: 3
+2026-05-17 15:09:19,362 | INFO | Model: basic_gnn | Device: cuda:0
+2026-05-17 15:09:19,387 | INFO | Split sizes: train=11829, val=3942, test=3946
+2026-05-17 15:09:22,565 | INFO | Saved results to outputs/pubmed_basic_gnn_seed42_20260517_150918/results.json
+2026-05-17 15:09:22,679 | INFO | Saved test outputs to outputs/pubmed_basic_gnn_seed42_20260517_150918/test_outputs.json
+2026-05-17 15:09:22,679 | INFO | Final metrics from the best validation checkpoint:
+2026-05-17 15:09:22,679 | INFO | train: loss=0.3798, acc=0.8735, macro_f1=0.8677, weighted_f1=0.8731
+2026-05-17 15:09:22,679 | INFO | val: loss=0.4069, acc=0.8595, macro_f1=0.8522, weighted_f1=0.8590
+2026-05-17 15:09:22,679 | INFO | test: loss=0.3821, acc=0.8743, macro_f1=0.8678, weighted_f1=0.8740
+2026-05-17 15:09:22,679 | INFO | best_epoch=195, best_val_acc=0.8595
+2026-05-17 15:09:22,679 | INFO | Runtime profile: training_seconds=2.6154, avg_epoch_seconds=0.0131, test_full_graph_seconds=0.001292, test_ms_per_node=0.000327
+2026-05-17 15:09:22,679 | INFO | CUDA memory profile: training_peak_allocated_mb=172.90, single_node_test_peak_allocated_mb=172.90
