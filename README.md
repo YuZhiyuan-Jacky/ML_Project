@@ -43,6 +43,8 @@ pip install -r requirements.txt
 .
 ├── README.md                 # 面向读者的项目说明
 ├── CODEX.md                  # 面向 Codex 的工程约定
+├── REPORT.md                 # 课程大作业小论文式报告
+├── bibtex.bib                # 报告中使用的 BibTeX 参考文献
 ├── requirements.txt          # Python 依赖
 ├── args.py                   # 命令行参数定义和基础校验
 ├── main.py                   # 训练主入口
@@ -56,6 +58,17 @@ pip install -r requirements.txt
 │   └── pubmed/
 └── outputs/                  # 运行日志、结果和可选 checkpoint，已被 .gitignore 忽略
 ```
+
+## 报告与参考文献
+
+最终提交文档见 `REPORT.md`，采用小论文形式整理了任务背景、难度分析、方法介绍、实验设置、性能结果和效率对比。
+
+参考文献条目集中维护在 `bibtex.bib`，包括：
+
+- `basicGCNandGCN`：两个GCN方法的参考文献（basic_gcn、gcn）。
+- `graphTransformer`：PyG `TransformerConv` 对应的 UniMP/Graph Transformer operator 论文。
+- `alldatasets`：Cora、Citeseer、Pubmed 作为 Planetoid 引文网络基准时的常用引用。
+- `cora`、`citeseer`、`pubmed`：三个数据集各自的原始来源或常用来源。
 
 ## 已实现模型
 
