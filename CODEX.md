@@ -27,7 +27,7 @@
 - 数据加载由 `utils.load_graph_data` 负责，从 `dataset/` 读取现有预处理文件；不要恢复旧的 `GraphData.py`。
 - 随机种子使用 `tools.set_seed`。
 - 设备选择通过 `tools.set_device`，`utils.get_device` 只做参数封装。
-- 输出目录保持为 `outputs/<run_name>/`，其中包括 `run.log`、`results.json`，以及可选 `best.pt`。
+- 输出目录保持为 `outputs/<run_name>/`，其中包括 `run.log`、`results.json`、`test_outputs.json`，以及可选 `best.pt`。
 - 不要改动或删除 `dataset/` 下的原始数据和预处理结果。
 
 ## 验证要求

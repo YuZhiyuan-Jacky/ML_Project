@@ -104,9 +104,10 @@ CPU 快速烟测：
 
 ```text
 outputs/<run_name>/
-├── run.log        # 运行日志
-├── results.json   # 最终指标和训练历史
-└── best.pt        # 仅在 --save-model 时生成
+├── run.log           # 运行日志
+├── results.json      # 最终指标和训练历史
+├── test_outputs.json # 每个测试节点的模型输出和 GT
+└── best.pt           # 仅在 --save-model 时生成
 ```
 
 `run_name` 默认格式为 `<dataset>_<model>_seed<seed>_<timestamp>`。也可以手动指定：
@@ -154,3 +155,11 @@ outputs/<run_name>/
 - best epoch
 - best validation accuracy
 - 每个 epoch 的训练历史
+
+`test_outputs.json` 会记录测试集中每个节点的：
+
+- `node_index`：内部连续节点编号。
+- `ground_truth` / `ground_truth_label`：真实类别编号和类别名。
+- `prediction` / `prediction_label`：预测类别编号和类别名。
+- `logits`：模型原始输出。
+- `probabilities`：对 logits 做 softmax 后的类别概率。

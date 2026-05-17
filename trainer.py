@@ -66,6 +66,45 @@ class Trainer:
             "test": self.evaluate_split(self.data.test_mask),
         }
 
+    @torch.no_grad()
+    def collect_test_outputs(self) -> Dict[str, object]:
+        self.model.eval()
+        logits = self.model(self.data)
+        probabilities = F.softmax(logits, dim=-1)
+        test_indices = torch.where(self.data.test_mask)[0]
+        test_logits = logits[test_indices].detach().cpu()
+        test_probabilities = probabilities[test_indices].detach().cpu()
+        test_labels = self.data.y[test_indices].detach().cpu()
+        test_predictions = test_logits.argmax(dim=-1)
+        node_indices = test_indices.detach().cpu().tolist()
+
+        records = []
+        for row, node_index in enumerate(node_indices):
+            gt = int(test_labels[row].item())
+            pred = int(test_predictions[row].item())
+            records.append(
+                {
+                    "node_index": int(node_index),
+                    "ground_truth": gt,
+                    "ground_truth_label": self.data.label_names[gt],
+                    "prediction": pred,
+                    "prediction_label": self.data.label_names[pred],
+                    "logits": [float(value) for value in test_logits[row].tolist()],
+                    "probabilities": [float(value) for value in test_probabilities[row].tolist()],
+                }
+            )
+
+        return {
+            "run_name": self.args.run_name,
+            "dataset": self.args.dataset,
+            "model": self.args.model,
+            "seed": self.args.seed,
+            "best_epoch": self.best_epoch,
+            "label_names": self.data.label_names,
+            "num_test_nodes": len(records),
+            "records": records,
+        }
+
     def fit(self) -> Dict[str, Dict[str, float]]:
         bad_epochs = 0
         history = []
@@ -130,6 +169,11 @@ class Trainer:
             with open(results_path, "w", encoding="utf8") as fp:
                 json.dump(payload, fp, ensure_ascii=False, indent=2)
             self.logger.info(f"Saved results to {results_path}")
+
+            test_outputs_path = os.path.join(self.args.run_dir, "test_outputs.json")
+            with open(test_outputs_path, "w", encoding="utf8") as fp:
+                json.dump(self.collect_test_outputs(), fp, ensure_ascii=False, indent=2)
+            self.logger.info(f"Saved test outputs to {test_outputs_path}")
 
         if self.args.save_model:
             ensure_dir(self.args.run_dir)
