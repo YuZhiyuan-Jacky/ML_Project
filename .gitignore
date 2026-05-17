@@ -1,0 +1,35 @@
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and OS metadata
+.idea/
+.vscode/
+.DS_Store
+
+# Experiment outputs and model checkpoints
+outputs/
+runs/
+logs/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+# Large temporary arrays generated during experiments
+*.tmp.npy
+*.cache.npy
