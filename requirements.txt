@@ -1,0 +1,7 @@
+# Core dependencies for NodeClassification
+# Python 3.11 is recommended.
+numpy==2.1.2
+torch==2.4.1
+torch-geometric==2.6.1
+tqdm==4.67.1
+networkx==3.4.1
