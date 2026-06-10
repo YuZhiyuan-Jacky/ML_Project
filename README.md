@@ -50,7 +50,7 @@ pip install -r requirements.txt
 ├── main.py                   # 训练主入口
 ├── model.py                  # 模型定义和 build_model
 ├── trainer.py                # 训练、验证、测试、早停、保存结果
-├── utils.py                  # 数据加载、划分、指标、日志、设备封装
+├── utils.py                  # 数据加载、划分、指标、日志
 ├── tools.py                  # 通用工具：随机种子、设备选择、目录创建
 ├── dataset/
 │   ├── cora/
@@ -147,7 +147,7 @@ outputs/<run_name>/
 | `--train-ratio` | `0.6` | 浮点数 | 每个类别中划入训练集的比例。 |
 | `--val-ratio` | `0.2` | 浮点数 | 每个类别中划入验证集的比例；剩余样本进入测试集。 |
 | `--seed` | `42` | 整数 | 随机种子，用于数据划分和模型初始化。 |
-| `--device` | `auto` | `auto`, `cpu`, `cuda` | 运行设备；`auto` 会按平台优先选择可用 GPU，否则回退 CPU。 |
+| `--device` | `cuda` | `cpu`, `cuda` | 运行设备偏好；`cuda` 由 `tools.set_device` 按平台选择可用加速设备，不可用时回退 CPU。 |
 | `--gpu` | `0` | 整数 | CUDA 设备编号。 |
 | `--output-dir` | `outputs` | 路径 | 所有运行输出的根目录。 |
 | `--run-name` | 自动生成 | 字符串 | 当前运行的输出子目录名。 |

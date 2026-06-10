@@ -27,7 +27,13 @@ def parse_args():
     parser.add_argument("--train-ratio", type=float, default=0.6)
     parser.add_argument("--val-ratio", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="cuda",
+        choices=["cpu", "cuda"],
+        help="Runtime device preference. cuda delegates to tools.set_device and falls back when unavailable.",
+    )
     parser.add_argument("--gpu", type=int, default=0)
 
     parser.add_argument("--output-dir", type=str, default="outputs")

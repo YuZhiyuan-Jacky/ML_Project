@@ -15,7 +15,7 @@
 - `main.py`：入口编排，不写模型或训练细节。
 - `model.py`：模型定义和 `build_model`。
 - `trainer.py`：训练、验证、测试、早停、保存结果。
-- `utils.py`：数据加载、mask、指标、日志、设备封装。
+- `utils.py`：数据加载、mask、指标、日志。
 - `tools.py`：只保留实际复用的通用函数，目前是 `set_seed`、`set_device`、`create_dirs`。
 
 新增代码时保持职责边界，不要把数据加载、模型定义、训练循环重新堆到一个文件里。
@@ -26,7 +26,7 @@
 - 支持的模型入口：`basic_gnn`、`gcn`、`graph_transformer`。
 - 数据加载由 `utils.load_graph_data` 负责，从 `dataset/` 读取现有预处理文件；不要恢复旧的 `GraphData.py`。
 - 随机种子使用 `tools.set_seed`。
-- 设备选择通过 `tools.set_device`，`utils.get_device` 只做参数封装。
+- 设备选择通过 `tools.set_device`，入口层直接调用。
 - 输出目录保持为 `outputs/<run_name>/`，其中包括 `run.log`、`results.json`、`test_outputs.json`，以及可选 `best.pt`。
 - 不要改动或删除 `dataset/` 下的原始数据和预处理结果。
 

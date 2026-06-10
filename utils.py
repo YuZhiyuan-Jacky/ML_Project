@@ -17,7 +17,7 @@ from typing import Dict, List, Tuple
 import numpy as np
 import torch
 
-from tools import create_dirs, set_device as project_set_device
+from tools import create_dirs
 
 
 @dataclass
@@ -43,16 +43,6 @@ class GraphData:
     @property
     def num_classes(self) -> int:
         return len(self.label_names)
-
-
-def get_device(device_name: str, gpu: int = 0) -> torch.device:
-    if device_name == "cpu":
-        return torch.device("cpu")
-    if device_name == "cuda":
-        if not torch.cuda.is_available():
-            raise RuntimeError("CUDA was requested, but torch.cuda.is_available() is false.")
-        return torch.device(project_set_device(gpu, use_cuda=True))
-    return torch.device(project_set_device(gpu, use_cuda=True))
 
 
 def ensure_dir(path: str) -> None:

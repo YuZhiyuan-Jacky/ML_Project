@@ -1,8 +1,9 @@
+import torch
 from args import parse_args
 from model import build_model
+from tools import set_device, set_seed
 from trainer import Trainer
-from tools import set_seed
-from utils import get_device, load_graph_data, make_run_dir, make_run_name, move_to_device, setup_logger
+from utils import load_graph_data, make_run_dir, make_run_name, move_to_device, setup_logger
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     logger, log_path = setup_logger(args.run_dir)
 
     set_seed(args.seed)
-    device = get_device(args.device, args.gpu)
+    device = torch.device(set_device(args.gpu, use_cuda=args.device == "cuda"))
     logger.info(f"Run name: {args.run_name}")
     logger.info(f"Run dir: {args.run_dir}")
     logger.info(f"Log file: {log_path}")
