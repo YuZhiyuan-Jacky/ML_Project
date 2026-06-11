@@ -20,7 +20,10 @@ from utils import accuracy, ensure_dir, f1_scores
 
 
 class Trainer:
+    """封装一次节点分类实验的训练、验证、测试和结果保存流程。"""
+
     def __init__(self, model, data, args, logger=None):
+        """保存模型/数据/参数，并初始化 Adam 优化器和早停相关状态。"""
         self.model = model
         self.data = data
         self.args = args
@@ -36,28 +39,34 @@ class Trainer:
         self.device = next(self.model.parameters()).device
 
     def _snapshot_state_dict(self):
+        """复制当前模型参数到 CPU，作为最佳验证集 checkpoint。"""
         return {
             name: tensor.detach().cpu().clone()
             for name, tensor in self.model.state_dict().items()
         }
 
     def _synchronize_device(self) -> None:
+        """在 CUDA 上等待前面的异步计算结束，保证计时和显存统计准确。"""
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
 
     def _reset_cuda_peak_memory(self) -> None:
+        """清空 CUDA 峰值显存统计，方便单独测量某一段代码的显存峰值。"""
         if self.device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(self.device)
 
     def _cuda_peak_allocated_mb(self):
+        """返回当前统计窗口内的 CUDA 峰值显存；CPU/MPS 运行时返回 None。"""
         if self.device.type != "cuda":
             return None
         self._synchronize_device()
         return float(torch.cuda.max_memory_allocated(self.device) / (1024 ** 2))
 
     def train_epoch(self) -> float:
+        """训练一个 epoch，并返回训练集交叉熵损失。"""
         self.model.train()
         self.optimizer.zero_grad()
+        # 全图 GNN 一次前向会计算所有节点 logits，loss 只在 train_mask 上取。
         logits = self.model(self.data)
         loss = F.cross_entropy(logits[self.data.train_mask], self.data.y[self.data.train_mask])
         loss.backward()
@@ -66,6 +75,7 @@ class Trainer:
 
     @torch.no_grad()
     def evaluate_split(self, mask: torch.Tensor) -> Dict[str, float]:
+        """在给定 mask 对应的数据划分上计算 loss、accuracy 和 F1。"""
         self.model.eval()
         logits = self.model(self.data)
         split_logits = logits[mask]
@@ -81,6 +91,7 @@ class Trainer:
 
     @torch.no_grad()
     def evaluate_all(self) -> Dict[str, Dict[str, float]]:
+        """一次性评估训练集、验证集和测试集。"""
         return {
             "train": self.evaluate_split(self.data.train_mask),
             "val": self.evaluate_split(self.data.val_mask),
@@ -89,9 +100,10 @@ class Trainer:
 
     @torch.no_grad()
     def collect_test_outputs(self) -> Dict[str, object]:
+        """整理测试集每个节点的真实标签、预测标签、logits 和概率。"""
         self.model.eval()
         logits = self.model(self.data)
-        probabilities = F.softmax(logits, dim=-1)
+        probabilities = F.softmax(logits, dim=-1)  # 单标签多分类：把每个节点的类别分数转成概率分布。
         test_indices = torch.where(self.data.test_mask)[0]
         test_logits = logits[test_indices].detach().cpu()
         test_probabilities = probabilities[test_indices].detach().cpu()
@@ -103,6 +115,7 @@ class Trainer:
         for row, node_index in enumerate(node_indices):
             gt = int(test_labels[row].item())
             pred = int(test_predictions[row].item())
+            # records 会写入 test_outputs.json，便于演示时展示具体样本预测。
             records.append(
                 {
                     "node_index": int(node_index),
@@ -128,6 +141,7 @@ class Trainer:
 
     @torch.no_grad()
     def profile_test_inference(self) -> Dict[str, object]:
+        """统计测试阶段完整预测流程耗时，并换算平均每个测试节点耗时。"""
         self.model.eval()
         test_count = int(self.data.test_mask.sum().item())
 
@@ -135,12 +149,16 @@ class Trainer:
         self._synchronize_device()
         start_time = time.perf_counter()
         logits = self.model(self.data)
-        test_predictions = logits[self.data.test_mask].argmax(dim=-1)
+        test_probabilities = F.softmax(logits[self.data.test_mask], dim=-1)
+        test_predictions = test_probabilities.argmax(dim=-1)
         if self.device.type == "cuda":
+            # 触发 CUDA 张量实际 materialize，避免计时只包含调度开销。
             _ = test_predictions.detach()
         self._synchronize_device()
         elapsed_seconds = time.perf_counter() - start_time
 
+        # 节点分类是 full-batch 推理：一次把整张图输入模型，输出所有节点类别，再筛选 test 集合。
+        # 因此这里的单节点耗时是总预测耗时除以测试节点数得到的平均摊销值。
         seconds_per_node = elapsed_seconds / test_count if test_count > 0 else 0.0
         return {
             "test_num_nodes": test_count,
@@ -149,12 +167,13 @@ class Trainer:
             "test_ms_per_node": float(seconds_per_node * 1000.0),
             "single_node_test_peak_allocated_mb": self._cuda_peak_allocated_mb(),
             "measurement_note": (
-                "Full-batch GNN inference computes logits for the whole graph; "
-                "single-node test time is averaged as full-graph forward time divided by test node count."
+                "Full-batch GNN inference computes logits for the whole graph, then applies softmax on test nodes; "
+                "single-node test time is averaged as full prediction time divided by test node count."
             ),
         }
 
     def fit(self) -> Dict[str, Dict[str, float]]:
+        """完整训练入口：循环训练、早停、恢复最佳模型、保存指标和预测结果。"""
         bad_epochs = 0
         history = []
         self._reset_cuda_peak_memory()
@@ -177,6 +196,7 @@ class Trainer:
 
             val_acc = metrics["val"]["acc"]
             if val_acc > self.best_val_acc:
+                # 只根据验证集 accuracy 选最佳模型，测试集只用于最后汇报。
                 self.best_val_acc = val_acc
                 self.best_epoch = epoch
                 self.best_state = self._snapshot_state_dict()
@@ -184,6 +204,7 @@ class Trainer:
             else:
                 bad_epochs += 1
 
+            # 第 1 个 epoch 先显示一次训练状态，之后每隔 log_every 个 epoch 更新一次进度条指标。
             if epoch == 1 or epoch % self.args.log_every == 0:
                 progress.set_postfix(
                     loss=f"{train_loss:.4f}",
@@ -194,6 +215,7 @@ class Trainer:
                 )
 
             if bad_epochs >= self.args.patience:
+                # patience 个 epoch 验证集没有提升时提前停止训练。
                 progress.close()
                 self.logger.info(f"Early stopping at epoch {epoch}; best validation epoch was {self.best_epoch}.")
                 break
@@ -204,6 +226,7 @@ class Trainer:
         completed_epochs = len(history)
 
         if self.best_state is not None:
+            # 最终指标统一使用验证集表现最好的 checkpoint 来评估。
             self.model.load_state_dict(self.best_state)
 
         final_metrics = self.evaluate_all()
@@ -235,6 +258,7 @@ class Trainer:
         final_metrics["memory_profile"] = memory_profile
 
         if not self.args.no_save_results:
+            # results.json 保存聚合指标和训练历史；test_outputs.json 保存逐节点预测。
             ensure_dir(self.args.run_dir)
             results_path = os.path.join(self.args.run_dir, "results.json")
             payload = {

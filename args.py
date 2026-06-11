@@ -2,6 +2,7 @@ import argparse
 
 
 def parse_args():
+    """解析命令行参数，并在真正训练前做基础合法性检查。"""
     parser = argparse.ArgumentParser(description="Graph node classification experiments.")
 
     parser.add_argument("--dataset", type=str, default="cora", choices=["cora", "citeseer", "pubmed"])

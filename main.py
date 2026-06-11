@@ -7,11 +7,14 @@ from utils import load_graph_data, make_run_dir, make_run_name, move_to_device, 
 
 
 def main():
+    """程序入口：解析参数、加载数据和模型，然后启动训练评估流程。"""
     args = parse_args()
+    # 每次运行都单独创建一个输出目录，保存日志、指标和测试集预测结果。
     args.run_name = make_run_name(args)
     args.run_dir = make_run_dir(args.output_dir, args.run_name)
     logger, log_path = setup_logger(args.run_dir)
 
+    # 固定随机种子，尽量让数据划分、参数初始化和训练过程可复现。
     set_seed(args.seed)
     device = torch.device(set_device(args.gpu, use_cuda=args.device == "cuda"))
     logger.info(f"Run name: {args.run_name}")
@@ -21,6 +24,7 @@ def main():
 
     data = load_graph_data(args)
     data = move_to_device(data, device)
+    # 输入维度来自节点特征数，输出维度来自类别数。
     model = build_model(args, data.num_features, data.num_classes).to(device)
 
     logger.info(
@@ -34,6 +38,7 @@ def main():
     )
 
     trainer = Trainer(model, data, args, logger)
+    # 训练和评估模型，返回最佳验证检查点的指标。
     metrics = trainer.fit()
 
     logger.info("Final metrics from the best validation checkpoint:")
